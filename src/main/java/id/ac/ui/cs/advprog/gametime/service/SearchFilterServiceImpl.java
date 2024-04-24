@@ -27,18 +27,6 @@ public class SearchFilterServiceImpl implements SearchFilterService {
     }
 
     @Override
-    public Game findById(String gameId){
-        Game game = searchFilterRepository.findById(gameId);
-        return game;
-    }
-
-    @Override
-    public List<Game> findByName(String gameName){
-        List<Game> games = searchFilterRepository.findByName(gameName);
-        return games;
-    }
-
-    @Override
     public List<Game> findByPriceRange(double minPrice, double maxPrice){
         List<Game> games = searchFilterRepository.findByPriceRange(minPrice, maxPrice);
         return games;

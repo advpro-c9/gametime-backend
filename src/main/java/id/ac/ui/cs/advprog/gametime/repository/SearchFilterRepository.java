@@ -24,23 +24,8 @@ public class SearchFilterRepository {
         return gameData.iterator();
     }
 
-    public Game findById(String id) {
-        for (Game game : gameData) {
-            if (game.getGameId().equals(id)) {
-                return game;
-            }
-        }
-        return null;
-    }
-
-    public List<Game> findByName(String gameName) {
-        List<Game> result = new ArrayList<>();
-        for (Game game : gameData) {
-            if (game.getGameName().equalsIgnoreCase(gameName)) {
-                result.add(game);
-            }
-        }
-        return result;
+    public GameIterator findById(String id) {
+        return new FindByIdIterator(gameData, id);
     }
 
     public List<Game> findByPriceRange(double minPrice, double maxPrice) {

@@ -31,15 +31,12 @@ public class SearchFilterController {
 
     @GetMapping("/filteredGameList")
     public String filteredGameListPage(Model model, 
-                                    @RequestParam(value = "gameName", required = false) String gameName,
                                     @RequestParam(value = "minPrice", required = false) Double minPrice, 
                                     @RequestParam(value = "maxPrice", required = false) Double maxPrice, 
                                     @RequestParam(value = "gameGenres", required = false) List<String> gameGenres){
         List<Game> filteredGames;
 
-        if (gameName != null) {
-            filteredGames = searchFilterService.findByName(gameName);
-        } else if (gameGenres != null) {
+        if (gameGenres != null) {
             filteredGames = searchFilterService.findByGenres(gameGenres);
         } else if (minPrice != null || maxPrice != null) {
             filteredGames = searchFilterService.findByPriceRange(minPrice, maxPrice);
