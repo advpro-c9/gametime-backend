@@ -9,13 +9,14 @@ import lombok.Setter;
 
 @Getter @Setter @Entity @NoArgsConstructor @Table(name = "Game")
 public class Game {
-    @Id @Column(name = "game_id")
+
+    @Id
+    @Column(name = "game_id")
     private String gameId;
     @Column(name = "game_name")
     private String gameName;
     @ElementCollection
-    @CollectionTable(name = "game_genres", joinColumns = @JoinColumn(name = "gameId"))
-    @Column(name = "game_genre")
+    @Column(name = "game_genres")
     private List<String> gameGenres;
     @Column(name = "game_price")
     private double gamePrice;
