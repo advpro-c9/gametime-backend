@@ -13,20 +13,40 @@ public class SearchFilterServiceImpl implements SearchFilterService {
     private SearchFilterRepository searchFilterRepository;
 
     @Override
-    public Game create(Game game) { return null; }
+    public Game create(Game game) {
+        searchFilterRepository.create(game);
+        return game;
+    }
 
     @Override
-    public List<Game> findAll() { return null; }
+    public List<Game> findAll() {
+        Iterator<Game> gameIterator = searchFilterRepository.findAll();
+        List<Game> allGame = new ArrayList<>();
+        gameIterator.forEachRemaining(allGame::add);
+        return allGame;
+    }
 
     @Override
-    public Game findById(String gameId) { return null; }
+    public Game findById(String gameId){
+        Game game = searchFilterRepository.findById(gameId);
+        return game;
+    }
 
     @Override
-    public List<Game> findByName(String gameName) { return null; }
+    public List<Game> findByName(String gameName){
+        List<Game> games = searchFilterRepository.findByName(gameName);
+        return games;
+    }
 
     @Override
-    public List<Game> findByPriceRange(double minPrice, double maxPrice) { return null; }
+    public List<Game> findByPriceRange(double minPrice, double maxPrice){
+        List<Game> games = searchFilterRepository.findByPriceRange(minPrice, maxPrice);
+        return games;
+    }
 
     @Override
-    public List<Game> findByGenres (List<String> genres) { return null; }
+    public List<Game> findByGenres (List<String> genres){
+        List<Game> game = searchFilterRepository.findByGenres(genres);
+        return game;
+    }
 }
