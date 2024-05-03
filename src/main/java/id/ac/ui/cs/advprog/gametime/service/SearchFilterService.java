@@ -3,10 +3,10 @@ import id.ac.ui.cs.advprog.gametime.model.Game;
 import java.util.List;
 
 public interface SearchFilterService {
-    public Game create(Game game);
-    public List<Game> findAll();
+    Game create(Game game);
+    List<Game> findAll();
     Game findById(String gameId);
-    public List<Game> findByName(String gameName);
-    public List<Game> findByPriceRange(double minPrice, double maxPrice);
-    public List<Game> findByGenres(List<String> genres);
+    List<Game> findByName(String gameName);
+    List<Game> findByPriceRange(double minPrice, double maxPrice);
+    List<Game> findByGenres(List<String> genres);
 }
