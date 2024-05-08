@@ -8,8 +8,8 @@ import java.util.UUID;
 
 @Repository
 public class SearchFilterRepository {
-    static int id = 0;
-    private List<Game> gameData = new ArrayList<>();
+
+    private final List<Game> gameData = new ArrayList<>();
 
     public Game create (Game game) {
         if(game.getGameId() == null){
@@ -24,47 +24,16 @@ public class SearchFilterRepository {
         return gameData.iterator();
     }
 
-    public GameIterator findById(String id) {
-        return new FindByIdIterator(gameData, id);
-    }
-
-    public List<Game> findByPriceRange(double minPrice, double maxPrice) {
-        List<Game> gamesInRange = new ArrayList<>();
+    public Game findById(String id) {
         for (Game game : gameData) {
-            if (game.getGamePrice() >= minPrice && game.getGamePrice() <= maxPrice) {
-                gamesInRange.add(game);
+            if (game.getGameId().equals(id)) {
+                return game;
             }
         }
-        return gamesInRange;
+        return null;
     }
 
-    public List<Game> findByGenres(List<String> genres) {
-        List<Game> matchingGames = new ArrayList<>();
-        for (Game game : gameData) {
-            for (String genre : genres) {
-                if (game.getGameGenres().contains(genre)) {
-                    matchingGames.add(game);
-                    break;
-                }
-            }
-        }
-        return matchingGames;
+    public List<Game> findAllAsList() {
+        return new ArrayList<>(gameData);
     }
-    
-    // //case insensitif genres (sementara ngga butuh)
-    // public List<Game> findByGenre(List<String> genres) {
-    //     List<Game> matchingGames = new ArrayList<>();
-    //     for (Game game : gameData) {
-    //         for (String genre : genres) {
-    //             for (String gameGenre : game.getGameGenres()) {
-    //                 if (gameGenre.equalsIgnoreCase(genre)) {
-    //                     matchingGames.add(game);
-    //                     break; // keluar dari loop genre karena game sudah cocok dengan setidaknya satu genre
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     return matchingGames;
-    // }
-      
 }

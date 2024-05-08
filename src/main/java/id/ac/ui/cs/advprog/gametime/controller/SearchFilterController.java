@@ -1,52 +1,57 @@
 package id.ac.ui.cs.advprog.gametime.controller;
-import org.springframework.beans.factory.annotation.Autowired; 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
 
 import id.ac.ui.cs.advprog.gametime.model.Game;
 import id.ac.ui.cs.advprog.gametime.service.SearchFilterService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
-@RequestMapping("/find")
+@RestController
+@RequestMapping("/api/games")
 public class SearchFilterController {
-    
+
     @Autowired
     private SearchFilterService searchFilterService;
 
-    @GetMapping("/createGame")
-    public String createGamePage(Model model) {
-        Game game = new Game();
-        model.addAttribute("game", game);
-        return "CreateGame";
+    @PostMapping
+    public ResponseEntity<Game> createGame(@RequestBody Game game) {
+        Game createdGame = searchFilterService.create(game);
+        return ResponseEntity.ok(createdGame);
     }
 
-    @PostMapping("/createGame")
-    public String createGamePost(@ModelAttribute Game game, Model model){
-        searchFilterService.create(game);
-        return "redirect:listGame";
+    @GetMapping
+    public ResponseEntity<List<Game>> getAllGames() {
+        List<Game> games = searchFilterService.findAll();
+        return ResponseEntity.ok(games);
     }
 
-    @GetMapping("/filteredGameList")
-    public String filteredGameListPage(Model model, 
-                                    @RequestParam(value = "minPrice", required = false) Double minPrice, 
-                                    @RequestParam(value = "maxPrice", required = false) Double maxPrice, 
-                                    @RequestParam(value = "gameGenres", required = false) List<String> gameGenres){
-        List<Game> filteredGames;
-
-        if (gameGenres != null) {
-            filteredGames = searchFilterService.findByGenres(gameGenres);
-        } else if (minPrice != null || maxPrice != null) {
-            filteredGames = searchFilterService.findByPriceRange(minPrice, maxPrice);
+    @GetMapping("/{gameId}")
+    public ResponseEntity<Game> getGameById(@PathVariable String gameId) {
+        Game game = searchFilterService.findById(gameId);
+        if (game != null) {
+            return ResponseEntity.ok(game);
         } else {
-            // Jika tidak ada parameter yang diberikan, tampilkan semua games
-            filteredGames = searchFilterService.findAll();
+            return ResponseEntity.notFound().build();
         }
-        
-        model.addAttribute("games", filteredGames);
-        return "FilteredGameList";
     }
-    
+
+    @GetMapping("/name/{gameName}")
+    public ResponseEntity<List<Game>> getGamesByName(@PathVariable String gameName) {
+        List<Game> games = searchFilterService.findByName(gameName);
+        return ResponseEntity.ok(games);
+    }
+
+    @GetMapping("/price")
+    public ResponseEntity<List<Game>> getGamesByPriceRange(@RequestParam double minPrice, @RequestParam double maxPrice) {
+        List<Game> games = searchFilterService.findByPriceRange(minPrice, maxPrice);
+        return ResponseEntity.ok(games);
+    }
+
+    @GetMapping("/genres")
+    public ResponseEntity<List<Game>> getGamesByGenres(@RequestParam List<String> genres) {
+        List<Game> games = searchFilterService.findByGenres(genres);
+        return ResponseEntity.ok(games);
+    }
 }
