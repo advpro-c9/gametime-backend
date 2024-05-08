@@ -31,13 +31,28 @@ public class GameTest {
     }
 
     @Test
+    public void testGameIdInvalid() {
+        assertNotEquals("456", game.getGameId());
+    }
+
+    @Test
     public void testGameName() {
         assertEquals("Test Game", game.getGameName());
     }
 
     @Test
+    public void testGameNameInvalid() {
+        assertNotEquals("Invalid Game", game.getGameName());
+    }
+
+    @Test
     public void testGameDescription() {
         assertEquals("Test Game Description", game.getGameDescription());
+    }
+
+    @Test
+    public void testGameDescriptionInvalid() {
+        assertNotEquals("Invalid Game Description", game.getGameDescription());
     }
 
     @Test
@@ -49,7 +64,20 @@ public class GameTest {
     }
 
     @Test
+    public void testGameGenresInvalid() {
+        List<String> unexpectedGenres = new ArrayList<>();
+        unexpectedGenres.add("RPG");
+        unexpectedGenres.add("Simulation");
+        assertNotEquals(unexpectedGenres, game.getGameGenres());
+    }
+
+    @Test
     public void testGamePrice() {
         assertEquals(49.99, game.getGamePrice(), 0.001);
+    }
+
+    @Test
+    public void testGamePriceInvalid() {
+        assertNotEquals(59.99, game.getGamePrice(), 0.001);
     }
 }
