@@ -4,10 +4,7 @@ import id.ac.ui.cs.advprog.gametime.model.Game;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,7 +29,7 @@ class SearchFilterRepositoryTest {
         Game game2 = new Game();
         game2.setGameId("2");
         game2.setGameName("Game B");
-        game2.setGameDescription("Desc Game A");
+        game2.setGameDescription("Desc Game B");
         game2.setGamePrice(30.0);
         game2.setGameGenres(Arrays.asList("Strategy", "Action"));
         games.add(game2);
@@ -40,7 +37,7 @@ class SearchFilterRepositoryTest {
         Game game3 = new Game();
         game3.setGameId("3");
         game3.setGameName("Game C");
-        game3.setGameDescription("Desc Game A");
+        game3.setGameDescription("Desc Game B");
         game3.setGamePrice(40.0);
         game3.setGameGenres(Arrays.asList("RPG", "Adventure"));
         games.add(game3);
@@ -61,13 +58,46 @@ class SearchFilterRepositoryTest {
     }
 
     @Test
+    void testCreateInvalid() {
+        Game game0 = games.get(0);
+        Game game1 = games.get(1);
+        Game result = searchFilterRepository.create(game0);
+
+        assertNotEquals(game1, result);
+    }
+
+    @Test
     void testFindAll() {
         for (Game game : games) {
             searchFilterRepository.create(game);
         }
 
-        searchFilterRepository.findAll();
-        assertEquals(3, games.size());
+        Iterator<Game> iterator = searchFilterRepository.findAll();
+        int count = 0;
+        while (iterator.hasNext()) {
+            Game nextGame = iterator.next();
+            assertTrue(games.contains(nextGame));
+            count++;
+        }
+
+        assertEquals(games.size(), count);
+    }
+
+    @Test
+    void testFindAllInvalid() {
+        for (Game game : games) {
+            searchFilterRepository.create(game);
+        }
+
+        Iterator<Game> iterator = searchFilterRepository.findAll();
+        int count = 0;
+        while (iterator.hasNext()) {
+            Game nextGame = iterator.next();
+            assertTrue(games.contains(nextGame));
+            count++;
+        }
+
+        assertNotEquals(games.size()+1, count);
     }
 
     @Test
@@ -85,6 +115,15 @@ class SearchFilterRepositoryTest {
     }
 
     @Test
+    void testFindByIdInvalid() {
+        for (Game game : games) {
+            searchFilterRepository.create(game);
+        }
+
+        assertNull(searchFilterRepository.findById("999"));
+    }
+
+    @Test
     void testFindByName() {
         for (Game game : games) {
             searchFilterRepository.create(game);
@@ -96,6 +135,15 @@ class SearchFilterRepositoryTest {
         assertEquals(games.get(1).getGameDescription(), findResult.getFirst().getGameDescription());
         assertEquals(games.get(1).getGamePrice(), findResult.getFirst().getGamePrice());
         assertEquals(games.get(1).getGameGenres(), findResult.getFirst().getGameGenres());
+    }
+
+    @Test
+    void testFindByNameInvalid() {
+        for (Game game : games) {
+            searchFilterRepository.create(game);
+        }
+
+        assertTrue(searchFilterRepository.findByName("Nonexistent Game").isEmpty());
     }
 
     @Test
@@ -113,6 +161,15 @@ class SearchFilterRepositoryTest {
     }
 
     @Test
+    void testFindByPriceRangeInvalid() {
+        for (Game game : games) {
+            searchFilterRepository.create(game);
+        }
+
+        assertTrue(searchFilterRepository.findByPriceRange(10.0, 15.0).isEmpty());
+    }
+
+    @Test
     void testFindByGenres() {
         for (Game game : games) {
             searchFilterRepository.create(game);
@@ -124,5 +181,14 @@ class SearchFilterRepositoryTest {
         assertEquals(games.get(1).getGameDescription(), findResult.get(1).getGameDescription());
         assertEquals(games.get(1).getGamePrice(), findResult.get(1).getGamePrice());
         assertEquals(games.get(1).getGameGenres(), findResult.get(1).getGameGenres());
+    }
+
+    @Test
+    void testFindByGenresInvalid() {
+        for (Game game : games) {
+            searchFilterRepository.create(game);
+        }
+
+        assertTrue(searchFilterRepository.findByGenres(Arrays.asList("Puzzle", "Simulation")).isEmpty());
     }
 }
