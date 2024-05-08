@@ -49,6 +49,29 @@ class SearchFilterServiceImplTest {
     }
 
     @Test
+    void createInvalid() {
+        Game game = new Game();
+        game.setGameId("1");
+        game.setGameName("Game A");
+        game.setGameDescription("Desc Game A");
+        game.setGamePrice(20.0);
+        game.setGameGenres(Arrays.asList("Action", "Adventure"));
+
+        Game game2 = new Game();
+        game2.setGameId("2");
+        game2.setGameName("Game B");
+        game2.setGameDescription("Desc Game B");
+        game2.setGamePrice(30.0);
+        game2.setGameGenres(Arrays.asList("Strategy", "Action"));
+
+        when(searchFilterRepository.create(game)).thenReturn(game2);
+
+        Game createdGame = searchFilterService.create(game);
+        assertNotEquals(game2, createdGame);
+        verify(searchFilterRepository, times(1)).create(game);
+    }
+
+    @Test
     void findAll() {
         List<Game> games = new ArrayList<>();
 
@@ -94,6 +117,17 @@ class SearchFilterServiceImplTest {
     }
 
     @Test
+    void findByIdInvalid() {
+        String invalidId = "999";
+        when(searchFilterRepository.findById(invalidId)).thenReturn(null);
+
+        Game foundGame = searchFilterService.findById(invalidId);
+
+        assertNull(foundGame);
+        verify(searchFilterRepository, times(1)).findById(invalidId);
+    }
+
+    @Test
     void findByName() {
         List<Game> games = new ArrayList<>();
 
@@ -123,6 +157,17 @@ class SearchFilterServiceImplTest {
     }
 
     @Test
+    void findByNameInvalid() {
+        String invalidName = "Invalid Game Name";
+        when(searchFilterRepository.findByName(invalidName)).thenReturn(new ArrayList<>());
+
+        List<Game> foundGames = searchFilterService.findByName(invalidName);
+
+        assertTrue(foundGames.isEmpty());
+        verify(searchFilterRepository, times(1)).findByName(invalidName);
+    }
+
+    @Test
     void findByPriceRange() {
         List<Game> gamesInRange = new ArrayList<>();
 
@@ -130,7 +175,7 @@ class SearchFilterServiceImplTest {
         game1.setGameId("1");
         game1.setGameName("Game A");
         game1.setGameDescription("Desc Game A");
-        game1.setGamePrice(20.0);  // This game is within the range
+        game1.setGamePrice(20.0);
         game1.setGameGenres(Arrays.asList("Action", "Adventure"));
         gamesInRange.add(game1);
 
@@ -138,18 +183,28 @@ class SearchFilterServiceImplTest {
         game2.setGameId("2");
         game2.setGameName("Game B");
         game2.setGameDescription("Desc Game B");
-        game2.setGamePrice(30.0);  // This game is outside the range
+        game2.setGamePrice(30.0);
         game2.setGameGenres(Arrays.asList("Strategy", "Action"));
+        gamesInRange.add(game2);
 
-        when(searchFilterRepository.findByPriceRange(0.0, 25.0)).thenReturn(gamesInRange);
+        when(searchFilterRepository.findByPriceRange(0.0, 40.0)).thenReturn(gamesInRange);
 
-        List<Game> foundGames = searchFilterService.findByPriceRange(0.0, 25.0);
+        List<Game> foundGames = searchFilterService.findByPriceRange(0.0, 40.0);
 
-        assertEquals(1, foundGames.size());
+        assertEquals(2, foundGames.size());
         assertEquals(game1, foundGames.getFirst());
-        verify(searchFilterRepository, times(1)).findByPriceRange(0.0, 25.0);
+        verify(searchFilterRepository, times(1)).findByPriceRange(0.0, 40.0);
     }
 
+    @Test
+    void findByPriceRangeInvalid() {
+        when(searchFilterRepository.findByPriceRange(100.0, 200.0)).thenReturn(new ArrayList<>());
+
+        List<Game> foundGames = searchFilterService.findByPriceRange(100.0, 200.0);
+
+        assertTrue(foundGames.isEmpty());
+        verify(searchFilterRepository, times(1)).findByPriceRange(100.0, 200.0);
+    }
 
     @Test
     void findByGenres() {
@@ -180,5 +235,16 @@ class SearchFilterServiceImplTest {
         assertEquals(games.getFirst().getGameGenres(), foundGames.getFirst().getGameGenres());
         assertEquals(games.get(1).getGameGenres(), foundGames.get(1).getGameGenres());
         verify(searchFilterRepository, times(1)).findByGenres(genres);
+    }
+
+    @Test
+    void findByGenresInvalid() {
+        List<String> invalidGenres = Arrays.asList("Invalid Genre 1", "Invalid Genre 2");
+        when(searchFilterRepository.findByGenres(invalidGenres)).thenReturn(new ArrayList<>());
+
+        List<Game> foundGames = searchFilterService.findByGenres(invalidGenres);
+
+        assertTrue(foundGames.isEmpty());
+        verify(searchFilterRepository, times(1)).findByGenres(invalidGenres);
     }
 }
