@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -95,6 +95,16 @@ public class SearchFilterControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(game, response.getBody());
         verify(searchFilterService, times(1)).findById("1");
+    }
+
+    @Test
+    void testGetGameByIdInvalid() {
+        when(searchFilterService.findById("999")).thenReturn(null);
+
+        ResponseEntity<Game> response = searchFilterController.getGameById("999");
+
+        assertNotEquals(HttpStatus.OK, response.getStatusCode());
+        verify(searchFilterService, times(1)).findById("999");
     }
 
     @Test
