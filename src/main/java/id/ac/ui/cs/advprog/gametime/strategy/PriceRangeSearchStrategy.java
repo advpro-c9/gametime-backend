@@ -1,29 +1,18 @@
 package id.ac.ui.cs.advprog.gametime.strategy;
 
 import id.ac.ui.cs.advprog.gametime.model.Game;
-
-import java.util.ArrayList;
+import id.ac.ui.cs.advprog.gametime.repository.SearchFilterRepository;
 import java.util.List;
 
 public class PriceRangeSearchStrategy implements SearchFilterStrategy {
 
-    private final double minPrice;
-    private final double maxPrice;
-
-    public PriceRangeSearchStrategy(double minPrice, double maxPrice) {
-        this.minPrice = minPrice;
-        this.maxPrice = maxPrice;
-    }
+    private SearchFilterRepository searchFilterRepository;
 
     @Override
-    public List<Game> search(List<Game> gameData) {
-        List<Game> gamesInRange = new ArrayList<>();
-        for (Game game : gameData) {
-            double gamePrice = game.getGamePrice();
-            if (gamePrice >= minPrice && gamePrice <= maxPrice) {
-                gamesInRange.add(game);
-            }
-        }
-        return gamesInRange;
+    public List<Game> search(String gamePriceRange) {
+        String[] prices = gamePriceRange.split(",");
+        double minPrice = Double.parseDouble(prices[0]);
+        double maxPrice = Double.parseDouble(prices[1]);
+        return searchFilterRepository.findByGamePriceBetween(minPrice, maxPrice);
     }
 }
