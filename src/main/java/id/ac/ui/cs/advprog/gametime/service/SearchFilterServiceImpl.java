@@ -21,7 +21,7 @@ public class SearchFilterServiceImpl implements SearchFilterService {
     public List<Game> search(String type, String input) {
         SearchFilterStrategy strategy = searchFilterStrategyType.getStrategy(type, searchFilterRepository);
         if (strategy != null) {
-            return strategy.search(input);
+            return (List<Game>) strategy.search(input);
         }
         throw new IllegalArgumentException("Tipe " + type + " tidak sesuai untuk dicari");
     }
