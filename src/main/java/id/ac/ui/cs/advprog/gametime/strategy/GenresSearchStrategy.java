@@ -8,6 +8,10 @@ public class GenresSearchStrategy implements SearchFilterStrategy {
 
     private SearchFilterRepository searchFilterRepository;
 
+    public GenresSearchStrategy(SearchFilterRepository searchFilterRepository) {
+        this.searchFilterRepository = searchFilterRepository;
+    }
+
     @Override
     public List<Game> search(String gameGenres) {
         List<String> gameGenreList = List.of(gameGenres.split(","));

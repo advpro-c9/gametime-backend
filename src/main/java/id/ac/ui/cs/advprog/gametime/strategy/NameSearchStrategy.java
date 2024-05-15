@@ -6,8 +6,11 @@ import java.util.List;
 
 public class NameSearchStrategy implements SearchFilterStrategy {
 
-    private SearchFilterRepository searchFilterRepository;
+    private final SearchFilterRepository searchFilterRepository;
 
+    public NameSearchStrategy(SearchFilterRepository searchFilterRepository) {
+        this.searchFilterRepository = searchFilterRepository;
+    }
     @Override
     public List<Game> search(String gameName) {
         return searchFilterRepository.findByGameNameContaining(gameName);

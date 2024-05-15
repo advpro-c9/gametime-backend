@@ -8,6 +8,10 @@ public class PriceRangeSearchStrategy implements SearchFilterStrategy {
 
     private SearchFilterRepository searchFilterRepository;
 
+    public PriceRangeSearchStrategy(SearchFilterRepository searchFilterRepository) {
+        this.searchFilterRepository = searchFilterRepository;
+    }
+
     @Override
     public List<Game> search(String gamePriceRange) {
         String[] prices = gamePriceRange.split(",");
