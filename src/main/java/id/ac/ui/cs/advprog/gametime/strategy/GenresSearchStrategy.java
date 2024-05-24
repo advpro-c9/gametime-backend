@@ -15,17 +15,10 @@ public class GenresSearchStrategy implements SearchFilterStrategy {
         this.searchFilterRepository = searchFilterRepository;
     }
 
-//    @Override
-//    public List<Game> search(String gameGenres) {
-//        List<String> gameGenreList = List.of(gameGenres.split(","));
-//        return searchFilterRepository.findByGameGenreIn(gameGenreList);
-//    }
-
     @Override
     @Async
-    public CompletableFuture<List<Game>> search(String gameGenres) {
-        List<String> gameGenreList = List.of(gameGenres.split(","));
-        List<Game> foundGames = searchFilterRepository.findByGameGenreIn(gameGenreList);
+    public CompletableFuture<List<Game>> search(String gameGenre) {
+        List<Game> foundGames = searchFilterRepository.findByGameGenreContaining(gameGenre);
         return CompletableFuture.completedFuture(foundGames);
     }
 

@@ -10,6 +10,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface SearchFilterRepository extends JpaRepository<Game, UUID>{
 
     List<Game> findByGameNameContaining(String name);
-    List<Game> findByGameGenreIn(List<String> genres);
+    List<Game> findByGameGenreContaining(String genre);
     List<Game> findByGamePriceBetween(double minPrice, double maxPrice);
 }

@@ -6,6 +6,7 @@ import id.ac.ui.cs.advprog.gametime.strategy.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class SearchFilterServiceImpl implements SearchFilterService {
@@ -18,10 +19,10 @@ public class SearchFilterServiceImpl implements SearchFilterService {
         this.searchFilterStrategyType = searchFilterStrategyType;
         this.searchFilterRepository = searchFilterRepository;
     }
-    public List<Game> search(String type, String input) {
+    public CompletableFuture<List<Game>> search(String type, String input) {
         SearchFilterStrategy strategy = searchFilterStrategyType.getStrategy(type, searchFilterRepository);
         if (strategy != null) {
-            return (List<Game>) strategy.search(input);
+            return strategy.search(input);
         }
         throw new IllegalArgumentException("Tipe " + type + " tidak sesuai untuk dicari");
     }
