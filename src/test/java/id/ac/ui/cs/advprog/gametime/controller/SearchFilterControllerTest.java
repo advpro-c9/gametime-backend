@@ -9,16 +9,21 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-public class SearchFilterControllerTest {
+class SearchFilterControllerTest {
 
     @Mock
     private SearchFilterService searchFilterService;
@@ -26,172 +31,54 @@ public class SearchFilterControllerTest {
     @InjectMocks
     private SearchFilterController searchFilterController;
 
+    private MockMvc mockMvc;
+
+    private Game game;
+    private final UUID id = UUID.randomUUID();
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(searchFilterController).build();
+
+        game = new Game();
+        game.setGameId(id);
+        game.setGameName("Test Game");
+        game.setGameDescription("Test Game Description");
+        game.setGameGenre("Adventure");
+        game.setGamePrice(49.99);
     }
 
     @Test
-    void testCreateGame() {
-        Game game = new Game();
-        game.setGameId("1");
-        game.setGameName("Game A");
-        game.setGameDescription("Desc Game A");
-        game.setGamePrice(20.0);
-        game.setGameGenres(Arrays.asList("Action", "Adventure"));
+    void testSearchGame_HappyPath() throws Exception {
+        String type = "genre";
+        String input = "Adventure";
 
-        when(searchFilterService.create(any(Game.class))).thenReturn(game);
+        when(searchFilterService.search(type, input)).thenReturn(Arrays.asList(game));
 
-        ResponseEntity<Game> response = searchFilterController.createGame(game);
+        mockMvc.perform(get("/api/games/search/{type}/{input}", type, input))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].gameId").value(game.getGameId().toString()))
+                .andExpect(jsonPath("$[0].gameName").value(game.getGameName()))
+                .andExpect(jsonPath("$[0].gameDescription").value(game.getGameDescription()))
+                .andExpect(jsonPath("$[0].gameGenre").value(game.getGameGenre()))
+                .andExpect(jsonPath("$[0].gamePrice").value(game.getGamePrice()));
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(game, response.getBody());
-        verify(searchFilterService, times(1)).create(any(Game.class));
+        verify(searchFilterService, times(1)).search(type, input);
     }
 
     @Test
-    void testGetAllGames() {
-        List<Game> games = new ArrayList<>();
+    void testSearchGame_UnhappyPath_NoResult() throws Exception {
+        String type = "genre";
+        String input = "NonExistingGenre";
 
-        Game game1 = new Game();
-        game1.setGameId("1");
-        game1.setGameName("Pokemon A");
-        game1.setGameDescription("Desc Game A");
-        game1.setGamePrice(20.0);
-        game1.setGameGenres(Arrays.asList("Action", "Adventure"));
-        games.add(game1);
+        when(searchFilterService.search(type, input)).thenReturn(Collections.emptyList());
 
-        Game game2 = new Game();
-        game2.setGameId("2");
-        game2.setGameName("Pokemon B");
-        game2.setGameDescription("Desc Game B");
-        game2.setGamePrice(30.0);
-        game2.setGameGenres(Arrays.asList("Strategy", "Action"));
-        games.add(game2);
+        mockMvc.perform(get("/api/games/search/{type}/{input}", type, input))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
 
-        when(searchFilterService.findAll()).thenReturn(games);
-
-        ResponseEntity<List<Game>> response = searchFilterController.getAllGames();
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(games, response.getBody());
-        verify(searchFilterService, times(1)).findAll();
-    }
-
-    @Test
-    void testGetGameById() {
-
-        Game game = new Game();
-        game.setGameId("1");
-        game.setGameName("Game A");
-        game.setGameDescription("Desc Game A");
-        game.setGamePrice(20.0);
-        game.setGameGenres(Arrays.asList("Action", "Adventure"));
-
-        when(searchFilterService.findById("1")).thenReturn(game);
-
-        ResponseEntity<Game> response = searchFilterController.getGameById("1");
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(game, response.getBody());
-        verify(searchFilterService, times(1)).findById("1");
-    }
-
-    @Test
-    void testGetGameByIdInvalid() {
-        when(searchFilterService.findById("999")).thenReturn(null);
-
-        ResponseEntity<Game> response = searchFilterController.getGameById("999");
-
-        assertNotEquals(HttpStatus.OK, response.getStatusCode());
-        verify(searchFilterService, times(1)).findById("999");
-    }
-
-    @Test
-    void testGetGamesByName() {
-        List<Game> games = new ArrayList<>();
-
-        Game game1 = new Game();
-        game1.setGameId("1");
-        game1.setGameName("Pokemon A");
-        game1.setGameDescription("Desc Game A");
-        game1.setGamePrice(20.0);
-        game1.setGameGenres(Arrays.asList("Action", "Adventure"));
-        games.add(game1);
-
-        Game game2 = new Game();
-        game2.setGameId("2");
-        game2.setGameName("Pokemon B");
-        game2.setGameDescription("Desc Game B");
-        game2.setGamePrice(30.0);
-        game2.setGameGenres(Arrays.asList("Strategy", "Action"));
-        games.add(game2);
-
-        when(searchFilterService.findByName("Pokemon")).thenReturn(games);
-
-        ResponseEntity<List<Game>> response = searchFilterController.getGamesByName("Pokemon");
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(games, response.getBody());
-        verify(searchFilterService, times(1)).findByName("Pokemon");
-    }
-
-    @Test
-    void testGetGamesByPriceRange() {
-        List<Game> games = new ArrayList<>();
-
-        Game game1 = new Game();
-        game1.setGameId("1");
-        game1.setGameName("Pokemon A");
-        game1.setGameDescription("Desc Game A");
-        game1.setGamePrice(20.0);
-        game1.setGameGenres(Arrays.asList("Action", "Adventure"));
-        games.add(game1);
-
-        Game game2 = new Game();
-        game2.setGameId("2");
-        game2.setGameName("Pokemon B");
-        game2.setGameDescription("Desc Game B");
-        game2.setGamePrice(30.0);
-        game2.setGameGenres(Arrays.asList("Strategy", "Action"));
-        games.add(game2);
-
-        when(searchFilterService.findByPriceRange(0.0, 50.0)).thenReturn(games);
-
-        ResponseEntity<List<Game>> response = searchFilterController.getGamesByPriceRange(0.0, 50.0);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(games, response.getBody());
-        verify(searchFilterService, times(1)).findByPriceRange(0.0, 50.0);
-    }
-
-    @Test
-    void testGetGamesByGenres() {
-        List<Game> games = new ArrayList<>();
-
-        Game game1 = new Game();
-        game1.setGameId("1");
-        game1.setGameName("Pokemon A");
-        game1.setGameDescription("Desc Game A");
-        game1.setGamePrice(20.0);
-        game1.setGameGenres(Arrays.asList("Action", "Adventure"));
-        games.add(game1);
-
-        Game game2 = new Game();
-        game2.setGameId("2");
-        game2.setGameName("Pokemon B");
-        game2.setGameDescription("Desc Game B");
-        game2.setGamePrice(30.0);
-        game2.setGameGenres(Arrays.asList("Strategy", "Action"));
-        games.add(game2);
-
-        List<String> genres = List.of("Action", "Adventure");
-        when(searchFilterService.findByGenres(genres)).thenReturn(games);
-
-        ResponseEntity<List<Game>> response = searchFilterController.getGamesByGenres(genres);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(games, response.getBody());
-        verify(searchFilterService, times(1)).findByGenres(genres);
+        verify(searchFilterService, times(1)).search(type, input);
     }
 }
