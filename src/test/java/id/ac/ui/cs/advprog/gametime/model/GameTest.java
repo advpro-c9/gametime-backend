@@ -2,37 +2,32 @@ package id.ac.ui.cs.advprog.gametime.model;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import java.util.UUID;
 
 public class GameTest {
     private Game game;
+    private final UUID id = UUID.randomUUID();
 
     @BeforeEach
     public void setUp() {
         game = new Game();
-        game.setGameId("123");
+        game.setGameId(id);
         game.setGameName("Test Game");
         game.setGameDescription("Test Game Description");
-        List<String> genres = new ArrayList<>();
-        genres.add("Adventure");
-        genres.add("Action");
-        game.setGameGenres(genres);
+        game.setGameGenre("Adventure");
         game.setGamePrice(49.99);
     }
 
     @Test
     public void testGameId() {
-        assertEquals("123", game.getGameId());
+        assertEquals(id, game.getGameId());
     }
 
     @Test
     public void testGameIdInvalid() {
-        assertNotEquals("456", game.getGameId());
+        UUID anotherId = UUID.randomUUID();
+        assertNotEquals(anotherId, game.getGameId());
     }
 
     @Test
@@ -57,18 +52,12 @@ public class GameTest {
 
     @Test
     public void testGameGenres() {
-        List<String> expectedGenres = new ArrayList<>();
-        expectedGenres.add("Adventure");
-        expectedGenres.add("Action");
-        assertEquals(expectedGenres, game.getGameGenres());
+        assertEquals("Adventure", game.getGameGenre());
     }
 
     @Test
     public void testGameGenresInvalid() {
-        List<String> unexpectedGenres = new ArrayList<>();
-        unexpectedGenres.add("RPG");
-        unexpectedGenres.add("Simulation");
-        assertNotEquals(unexpectedGenres, game.getGameGenres());
+        assertNotEquals("Action", game.getGameGenre());
     }
 
     @Test
