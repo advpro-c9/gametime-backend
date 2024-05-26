@@ -39,10 +39,10 @@ dependencies {
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.mockito:mockito-core")
-	testImplementation("org.mockito:mockito-junit-jupiter")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.postgresql:postgresql")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	runtimeOnly("io.micrometer:micrometer-registry-prometheus")
 }
 
 tasks.withType<Test> {
