@@ -10,9 +10,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.*;
-
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -45,14 +45,15 @@ class SearchFilterServiceImplTest {
     }
 
     @Test
-    void testSearch() {
+    void testSearch() throws ExecutionException, InterruptedException {
         String type = "genre";
         String input = "Adventure";
 
         when(searchFilterStrategyType.getStrategy(type, searchFilterRepository)).thenReturn(searchFilterStrategy);
-        when(searchFilterStrategy.search(input)).thenReturn(Arrays.asList(game));
+        when(searchFilterStrategy.search(input)).thenReturn(CompletableFuture.completedFuture(Arrays.asList(game)));
 
-        List<Game> foundGames = searchFilterServiceImpl.search(type, input);
+        CompletableFuture<List<Game>> foundGamesFuture = searchFilterServiceImpl.search(type, input);
+        List<Game> foundGames = foundGamesFuture.get();
 
         assertNotNull(foundGames);
         assertEquals(1, foundGames.size());
@@ -63,14 +64,15 @@ class SearchFilterServiceImplTest {
     }
 
     @Test
-    void testSearchNoResult() {
+    void testSearchNoResult() throws ExecutionException, InterruptedException {
         String type = "genre";
         String input = "NonExistingGenre";
 
         when(searchFilterStrategyType.getStrategy(type, searchFilterRepository)).thenReturn(searchFilterStrategy);
-        when(searchFilterStrategy.search(input)).thenReturn(Collections.emptyList());
+        when(searchFilterStrategy.search(input)).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
 
-        List<Game> foundGames = searchFilterServiceImpl.search(type, input);
+        CompletableFuture<List<Game>> foundGamesFuture = searchFilterServiceImpl.search(type, input);
+        List<Game> foundGames = foundGamesFuture.get();
 
         assertNotNull(foundGames);
         assertTrue(foundGames.isEmpty());
@@ -105,7 +107,8 @@ class SearchFilterServiceImplTest {
         when(searchFilterStrategy.search(input)).thenThrow(new RuntimeException("Database error"));
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
-            searchFilterServiceImpl.search(type, input);
+            CompletableFuture<List<Game>> foundGamesFuture = searchFilterServiceImpl.search(type, input);
+            foundGamesFuture.join();
         });
 
         assertEquals("Database error", exception.getMessage());

@@ -4,33 +4,30 @@ import id.ac.ui.cs.advprog.gametime.model.Game;
 import id.ac.ui.cs.advprog.gametime.service.SearchFilterService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
+import org.springframework.test.web.servlet.MvcResult;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.concurrent.CompletableFuture;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@ExtendWith(MockitoExtension.class)
+@WebMvcTest(SearchFilterController.class)
 class SearchFilterControllerTest {
 
-    @Mock
+    @MockBean
     private SearchFilterService searchFilterService;
 
-    @InjectMocks
-    private SearchFilterController searchFilterController;
-
+    @Autowired
     private MockMvc mockMvc;
 
     private Game game;
@@ -38,9 +35,6 @@ class SearchFilterControllerTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(searchFilterController).build();
-
         game = new Game();
         game.setGameId(id);
         game.setGameName("Test Game");
@@ -50,13 +44,17 @@ class SearchFilterControllerTest {
     }
 
     @Test
-    void testSearchGame_HappyPath() throws Exception {
+    void testSearchGame() throws Exception {
         String type = "genre";
         String input = "Adventure";
 
-        when(searchFilterService.search(type, input)).thenReturn(Arrays.asList(game));
+        when(searchFilterService.search(type, input)).thenReturn(CompletableFuture.completedFuture(Arrays.asList(game)));
 
-        mockMvc.perform(get("/api/games/search/{type}/{input}", type, input))
+        MvcResult mvcResult = mockMvc.perform(get("/games/search/{type}/{input}", type, input))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].gameId").value(game.getGameId().toString()))
@@ -69,13 +67,17 @@ class SearchFilterControllerTest {
     }
 
     @Test
-    void testSearchGame_UnhappyPath_NoResult() throws Exception {
+    void testSearchGameNoResult() throws Exception {
         String type = "genre";
         String input = "NonExistingGenre";
 
-        when(searchFilterService.search(type, input)).thenReturn(Collections.emptyList());
+        when(searchFilterService.search(type, input)).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
 
-        mockMvc.perform(get("/api/games/search/{type}/{input}", type, input))
+        MvcResult mvcResult = mockMvc.perform(get("/games/search/{type}/{input}", type, input))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
 

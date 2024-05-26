@@ -6,12 +6,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -39,12 +39,13 @@ class GenresSearchStrategyTest {
     }
 
     @Test
-    void testSearch() {
+    void testSearch() throws ExecutionException, InterruptedException {
         String genre = "Adventure";
 
         when(searchFilterRepository.findByGameGenreContaining(genre)).thenReturn(Arrays.asList(game));
 
-        List<Game> foundGames = genresSearchStrategy.search(genre);
+        CompletableFuture<List<Game>> foundGamesFuture = genresSearchStrategy.search(genre);
+        List<Game> foundGames = foundGamesFuture.get();
 
         assertNotNull(foundGames);
         assertEquals(1, foundGames.size());
@@ -54,12 +55,13 @@ class GenresSearchStrategyTest {
     }
 
     @Test
-    void testSearchNoResult() {
+    void testSearchNoResult() throws ExecutionException, InterruptedException {
         String genre = "NonExistingGenre";
 
         when(searchFilterRepository.findByGameGenreContaining(genre)).thenReturn(Collections.emptyList());
 
-        List<Game> foundGames = genresSearchStrategy.search(genre);
+        CompletableFuture<List<Game>> foundGamesFuture = genresSearchStrategy.search(genre);
+        List<Game> foundGames = foundGamesFuture.get();
 
         assertNotNull(foundGames);
         assertTrue(foundGames.isEmpty());
@@ -74,7 +76,8 @@ class GenresSearchStrategyTest {
         when(searchFilterRepository.findByGameGenreContaining(genre)).thenThrow(new RuntimeException("Database error"));
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
-            genresSearchStrategy.search(genre);
+            CompletableFuture<List<Game>> foundGamesFuture = genresSearchStrategy.search(genre);
+            foundGamesFuture.join();
         });
 
         assertEquals("Database error", exception.getMessage());

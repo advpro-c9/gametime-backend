@@ -7,13 +7,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.*;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-//@DataJpaTest
 @ExtendWith(MockitoExtension.class)
 class SearchFilterRepositoryTest {
 
@@ -38,13 +35,23 @@ class SearchFilterRepositoryTest {
     void testFindByGameNameContaining() {
         when(searchFilterRepository.findByGameNameContaining(anyString())).thenReturn(Arrays.asList(game));
         List<Game> foundGames = searchFilterRepository.findByGameNameContaining("Test");
+
+        assertNotNull(foundGames);
+        assertEquals(1, foundGames.size());
+        assertEquals(game.getGameName(), foundGames.get(0).getGameName());
+
         verify(searchFilterRepository, times(1)).findByGameNameContaining("Test");
     }
 
     @Test
-    void testFindByGameGenreIn() {
+    void testFindByGameGenreContaining() {
         when(searchFilterRepository.findByGameGenreContaining(anyString())).thenReturn(Arrays.asList(game));
         List<Game> foundGames = searchFilterRepository.findByGameGenreContaining("Adventure");
+
+        assertNotNull(foundGames);
+        assertEquals(1, foundGames.size());
+        assertEquals(game.getGameGenre(), foundGames.get(0).getGameGenre());
+
         verify(searchFilterRepository, times(1)).findByGameGenreContaining("Adventure");
     }
 
@@ -52,11 +59,16 @@ class SearchFilterRepositoryTest {
     void testFindByGamePriceBetween() {
         when(searchFilterRepository.findByGamePriceBetween(anyDouble(), anyDouble())).thenReturn(Arrays.asList(game));
         List<Game> foundGames = searchFilterRepository.findByGamePriceBetween(30.00, 60.00);
+
+        assertNotNull(foundGames);
+        assertEquals(1, foundGames.size());
+        assertEquals(game.getGamePrice(), foundGames.get(0).getGamePrice());
+
         verify(searchFilterRepository, times(1)).findByGamePriceBetween(30.00, 60.00);
     }
 
     @Test
-    void testFindByGameNameContaining_NoResult() {
+    void testFindByGameNameContainingNoResult() {
         when(searchFilterRepository.findByGameNameContaining(anyString())).thenReturn(Collections.emptyList());
         List<Game> foundGames = searchFilterRepository.findByGameNameContaining("NonExistingGame");
         assertTrue(foundGames.isEmpty(), "The list of found games should be empty");
@@ -64,7 +76,7 @@ class SearchFilterRepositoryTest {
     }
 
     @Test
-    void testFindByGameGenreContaining_NoResult() {
+    void testFindByGameGenreContainingNoResult() {
         when(searchFilterRepository.findByGameGenreContaining(anyString())).thenReturn(Collections.emptyList());
         List<Game> foundGames = searchFilterRepository.findByGameGenreContaining("NonExistingGenre");
         assertTrue(foundGames.isEmpty(), "The list of found games should be empty");
@@ -72,7 +84,7 @@ class SearchFilterRepositoryTest {
     }
 
     @Test
-    void testFindByGamePriceBetween_NoResult() {
+    void testFindByGamePriceBetweenNoResult() {
         when(searchFilterRepository.findByGamePriceBetween(anyDouble(), anyDouble())).thenReturn(Collections.emptyList());
         List<Game> foundGames = searchFilterRepository.findByGamePriceBetween(100.00, 200.00);
         assertTrue(foundGames.isEmpty(), "The list of found games should be empty");
@@ -80,7 +92,7 @@ class SearchFilterRepositoryTest {
     }
 
     @Test
-    void testFindByGameNameContaining_Exception() {
+    void testFindByGameNameContainingException() {
         when(searchFilterRepository.findByGameNameContaining(anyString())).thenThrow(new RuntimeException("Database error"));
         Exception exception = assertThrows(RuntimeException.class, () -> {
             searchFilterRepository.findByGameNameContaining("Test");
@@ -90,7 +102,7 @@ class SearchFilterRepositoryTest {
     }
 
     @Test
-    void testFindByGameGenreContaining_Exception() {
+    void testFindByGameGenreContainingException() {
         when(searchFilterRepository.findByGameGenreContaining(anyString())).thenThrow(new RuntimeException("Database error"));
         Exception exception = assertThrows(RuntimeException.class, () -> {
             searchFilterRepository.findByGameGenreContaining("Adventure");
@@ -100,7 +112,7 @@ class SearchFilterRepositoryTest {
     }
 
     @Test
-    void testFindByGamePriceBetween_Exception() {
+    void testFindByGamePriceBetweenException() {
         when(searchFilterRepository.findByGamePriceBetween(anyDouble(), anyDouble())).thenThrow(new RuntimeException("Database error"));
         Exception exception = assertThrows(RuntimeException.class, () -> {
             searchFilterRepository.findByGamePriceBetween(30.00, 60.00);
